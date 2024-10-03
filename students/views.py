@@ -1,7 +1,7 @@
 # Create your views here.
 from .forms import StudentForm
 from django.contrib.auth.decorators import login_required
-
+from django.http import Http404
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Student
@@ -27,8 +27,14 @@ def student_list(request):
     return render(request, 'students/student_list.html', {'page_obj': page_obj, 'query': query})
 
 
+
+
+
 def student_detail(request, pk):
-    student = get_object_or_404(Student, pk=pk)
+    try:
+        student = get_object_or_404(Student, pk=pk)
+    except Http404:
+        return render(request, '404.html')  # Custom 404 page or generic message
     return render(request, 'students/student_detail.html', {'student': student})
 
 
@@ -44,9 +50,14 @@ def student_add(request):
     return render(request, 'students/student_form.html', {'form': form})
 
 
+
 @login_required
 def student_edit(request, pk):
-    student = get_object_or_404(Student, pk=pk)
+    try:
+        student = get_object_or_404(Student, pk=pk)
+    except Http404:
+        return render(request, '404.html')  # Custom 404 page
+
     if request.method == 'POST':
         form = StudentForm(request.POST, instance=student)
         if form.is_valid():
@@ -55,3 +66,4 @@ def student_edit(request, pk):
     else:
         form = StudentForm(instance=student)
     return render(request, 'students/student_form.html', {'form': form})
+
